@@ -2,7 +2,7 @@ import SwiftUI
 
 struct StoryCell: View {
 
-    var viewModel: UserViewModel
+    @Binding var viewModel: UserViewModel
 
     var body: some View {
         VStack {
@@ -11,11 +11,20 @@ struct StoryCell: View {
                 .scaledToFit()
                 .background(Color.green)
                 .clipShape(.capsule)
+                .overlay {
+                    Circle()
+                        .stroke(lineWidth: 7)
+                        .foregroundStyle(viewModel.seen ? Color.gray : Color.blue)
+                }
             Text(viewModel.name)
+        }
+        .onTapGesture {
+            viewModel.seen = true
+            UserDefaults.standard.set(true, forKey: "\(viewModel.id)")
         }
     }
 }
 
 #Preview {
-    StoryCell(viewModel: UserViewModel(id: 0, name: "Sample", picture: UIImage()))
+    StoryCell(viewModel: .constant(UserViewModel(id: 0, name: "Sample", picture: UIImage()))).frame(height: 100)
 }

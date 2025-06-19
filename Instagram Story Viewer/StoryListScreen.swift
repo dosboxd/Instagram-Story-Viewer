@@ -4,6 +4,14 @@ struct UserViewModel {
     let id: Int
     let name: String
     let picture: UIImage
+    var seen: Bool
+
+    init(id: Int, name: String, picture: UIImage) {
+        self.id = id
+        self.name = name
+        self.picture = picture
+        self.seen = UserDefaults.standard.bool(forKey: "\(id)")
+    }
 }
 
 struct StoryListScreen: View {
@@ -16,13 +24,20 @@ struct StoryListScreen: View {
             Text("Instagram")
             ScrollView(.horizontal) {
                 LazyHStack {
-                    ForEach(userViewModels, id: \UserViewModel.id) {
-                        StoryCell(viewModel: $0)
+                    ForEach($userViewModels, id: \UserViewModel.id) { userViewModel in
+                        StoryCell(viewModel: userViewModel)
                     }
                 }
             }
             .frame(height: 128)
             .background(Color.pink)
+            .padding(.bottom, 16)
+            Button("Reset view state for all") {
+                for i in userViewModels.indices {
+                    UserDefaults.standard.set(false, forKey: "\(userViewModels[i].id)")
+                    userViewModels[i].seen = false
+                }
+            }
             Spacer()
         }
         .padding()
