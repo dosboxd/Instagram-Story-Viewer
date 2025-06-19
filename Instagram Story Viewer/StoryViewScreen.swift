@@ -5,13 +5,19 @@ struct StoryViewScreen: View {
 
     var viewModel: UserViewModel
     @State private var image: UIImage? = nil
+    var onLike: ((Bool) -> Void)?
 
     var body: some View {
         VStack {
             if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
+                VStack {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                    Button(viewModel.liked ? "Remove Like" : "Like") {
+                        onLike?(!viewModel.liked)
+                    }
+                }
             } else {
                 ProgressView()
             }
