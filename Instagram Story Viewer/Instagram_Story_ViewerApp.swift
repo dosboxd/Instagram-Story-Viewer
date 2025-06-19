@@ -11,7 +11,7 @@ import SwiftUI
 struct Instagram_Story_ViewerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            StoryListScreen()
         }
     }
 }
