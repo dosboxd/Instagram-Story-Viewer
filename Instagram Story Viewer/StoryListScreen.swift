@@ -32,18 +32,22 @@ struct StoryListScreen: View {
                 LazyHStack {
                     ForEach(userViewModels.indices, id: \.self) { index in
                         Button {
+                            print("Index", index)
                             self.selection = userViewModels[index]
                             userViewModels[index].seen = true
-                            UserDefaults.standard.set(
-                                true, forKey: "SEEN: \(userViewModels[index].id)")
+                            UserDefaults.standard.set(true, forKey: "SEEN: \(userViewModels[index].id)")
                             isPresented = true
                         } label: {
                             StoryCell(viewModel: userViewModels[index])
                                 .sheet(item: $selection) { selection in
-                                    StoryViewScreen(viewModel: selection) { isLiked in
-                                        userViewModels[index].liked = isLiked
-                                        UserDefaults.standard.set(isLiked, forKey: "LIKED: \(userViewModels[index].id)")
-                                    }
+                                    let localIndex = userViewModels.firstIndex(where: { $0.id == selection.id })!
+                                    StoryViewScreen(viewModels: userViewModels, index: localIndex, onLike: { isLiked, likedIndex in
+                                        userViewModels[likedIndex].liked = isLiked
+                                        UserDefaults.standard.set(isLiked, forKey: "LIKED: \(userViewModels[likedIndex].id)")
+                                    }, onSeen: { seenIndex in
+                                        userViewModels[seenIndex].seen = true
+                                        UserDefaults.standard.set(true, forKey: "SEEN: \(userViewModels[index].id)")
+                                    })
                                 }
                         }
                     }
@@ -54,8 +58,14 @@ struct StoryListScreen: View {
             .padding(.bottom, 16)
             Button("Reset view state for all") {
                 for i in userViewModels.indices {
-                    UserDefaults.standard.set(false, forKey: "\(userViewModels[i].id)")
+                    UserDefaults.standard.set(false, forKey: "SEEN: \(userViewModels[i].id)")
                     userViewModels[i].seen = false
+                }
+            }
+            Button("Reset like state for all") {
+                for i in userViewModels.indices {
+                    UserDefaults.standard.set(false, forKey: "LIKED: \(userViewModels[i].id)")
+                    userViewModels[i].liked = false
                 }
             }
             Spacer()
