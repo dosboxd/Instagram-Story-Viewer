@@ -18,5 +18,6 @@ struct StoryCell: View {
                 }
             Text(viewModel.name)
         }
+        .padding(.bottom, 16)
     }
 }

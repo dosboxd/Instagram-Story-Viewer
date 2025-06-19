@@ -6,7 +6,7 @@ struct StoryViewScreen: View {
     var viewModels: [UserViewModel]
     @State var index: Int
 
-    @State private var image: UIImage? = nil
+    @State private var image: UIImage?
     var onLike: ((Bool, Int) -> Void)?
     var onSeen: ((Int) -> Void)?
 
@@ -51,9 +51,12 @@ struct StoryViewScreen: View {
     }
 
     func loadImage() async {
-        if let dataResponse = try? await URLSession.shared.data(from: viewModels[index].storyURL) {
-            self.image = UIImage(data: dataResponse.0)
+        do {
+            let (data, _) = try await URLSession.shared.data(from: viewModels[index].storyURL)
+            self.image = UIImage(data: data)
             onSeen?(index)
+        } catch {
+            print("Handle errors")
         }
     }
 }
