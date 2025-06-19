@@ -1,15 +1,17 @@
 import SwiftUI
 
-struct UserViewModel {
+struct UserViewModel: Identifiable {
     let id: Int
     let name: String
     let picture: UIImage
+    let storyURL: URL
     var seen: Bool
 
-    init(id: Int, name: String, picture: UIImage) {
+    init(id: Int, name: String, picture: UIImage, storyURL: URL) {
         self.id = id
         self.name = name
         self.picture = picture
+        self.storyURL = storyURL
         self.seen = UserDefaults.standard.bool(forKey: "\(id)")
     }
 }
@@ -18,14 +20,25 @@ struct StoryListScreen: View {
 
     @State private var users: [User] = []
     @State private var userViewModels: [UserViewModel] = []
+    @State private var isPresented = false
+    @State private var selection: UserViewModel?
 
     var body: some View {
         VStack {
             Text("Instagram")
             ScrollView(.horizontal) {
                 LazyHStack {
-                    ForEach($userViewModels, id: \UserViewModel.id) { userViewModel in
-                        StoryCell(viewModel: userViewModel)
+                    ForEach(userViewModels.indices, id: \.self) { index in
+                        Button {
+                            self.selection = userViewModels[index]
+                            userViewModels[index].seen = true
+                            UserDefaults.standard.set(true, forKey: "\(userViewModels[index].id)")
+                        } label: {
+                            StoryCell(viewModel: userViewModels[index])
+                                .sheet(item: $selection) { selection in
+                                    StoryViewScreen(viewModel: selection)
+                                }
+                        }
                     }
                 }
             }
@@ -53,7 +66,7 @@ struct StoryListScreen: View {
                         guard let url = URL(string: user.profile_picture_url) else { continue }
                         group.addTask {
                             let (data, _) = try await URLSession.shared.data(from: url)
-                            return UserViewModel(id: user.id, name: user.name, picture: UIImage(data: data)!)
+                            return UserViewModel(id: user.id, name: user.name, picture: UIImage(data: data)!, storyURL: url)
                         }
                     }
 
@@ -71,20 +84,3 @@ struct StoryListScreen: View {
         }
     }
 }
-
-#Preview {
-    StoryListScreen()
-}
-
-func downloadImage(from url: URL) async throws -> UIImage {
-    let (data, _) = try await URLSession.shared.data(from: url)
-    guard let image = UIImage(data: data) else {
-        throw ImageError.invalidData
-    }
-    return image
-}
-
-enum ImageError: Error {
-    case invalidData
-}
-

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct StoryCell: View {
 
-    @Binding var viewModel: UserViewModel
+    var viewModel: UserViewModel
 
     var body: some View {
         VStack {
@@ -18,13 +18,5 @@ struct StoryCell: View {
                 }
             Text(viewModel.name)
         }
-        .onTapGesture {
-            viewModel.seen = true
-            UserDefaults.standard.set(true, forKey: "\(viewModel.id)")
-        }
     }
-}
-
-#Preview {
-    StoryCell(viewModel: .constant(UserViewModel(id: 0, name: "Sample", picture: UIImage()))).frame(height: 100)
 }
